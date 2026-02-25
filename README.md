@@ -1,3 +1,2 @@
-# MoDa-Browser
-
-A modern web browser project
+# MoDaBrowser - 一个模块化、基于最小权限原则的下一代浏览器
+---
