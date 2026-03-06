@@ -4,6 +4,10 @@
 use std::sync::{Arc, Mutex};
 use tracing::{debug, info, warn};
 
+// 导入IPC模块
+mod ipc;
+use ipc::IPCManager;
+
 /// 核心架构组件
 pub struct CoreArchitecture {
     /// 组件状态
@@ -35,6 +39,41 @@ trait Component {
     fn shutdown(&self) -> Result<(), String>;
 }
 
+/// IPC组件实现
+struct IPCComponent {
+    ipc_manager: Arc<Mutex<IPCManager>>,
+}
+
+impl IPCComponent {
+    /// 创建新的IPC组件
+    fn new() -> Arc<Self> {
+        let ipc_manager = Arc::new(Mutex::new(IPCManager::new()));
+        Arc::new(Self { ipc_manager })
+    }
+}
+
+impl Component for IPCComponent {
+    fn name(&self) -> &'static str {
+        "IPCManager"
+    }
+
+    fn init(&self) -> Result<(), String> {
+        debug!("正在初始化IPC组件...");
+        let mut ipc_manager = self.ipc_manager.lock().unwrap();
+        ipc_manager.init()
+    }
+
+    fn run(&self) -> Result<(), String> {
+        debug!("正在运行IPC组件...");
+        Ok(())
+    }
+
+    fn shutdown(&self) -> Result<(), String> {
+        debug!("正在关闭IPC组件...");
+        Ok(())
+    }
+}
+
 impl CoreArchitecture {
     /// 创建新的核心架构实例
     pub fn new() -> Self {
@@ -42,7 +81,13 @@ impl CoreArchitecture {
 
         let mut components: Vec<Arc<dyn Component>> = Vec::new();
 
-        // 可以在这里添加默认组件
+        // 添加默认组件：IPC组件
+        let ipc_component = IPCComponent::new();
+        if let Err(e) = ipc_component.init() {
+            warn!("IPC组件初始化失败: {}, 将跳过添加此组件", e);
+        } else {
+            components.push(ipc_component);
+        }
 
         Self {
             state: Arc::new(Mutex::new(ComponentState::Initialized)),
