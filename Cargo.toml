@@ -3,7 +3,7 @@ name = "moda-browser-core"
 version = "0.1.0"
 edition = "2021"
 description = "MoDa Browser Core - 一个基于最小权限原则的现代模块化浏览器引擎"
-license = "MIT"
+license = "Apache 2.0"
 repository = "https://github.com/Ink-dark/MoDa-Browser"
 
 [dependencies]
