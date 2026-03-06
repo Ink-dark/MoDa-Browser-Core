@@ -1,10 +1,10 @@
 // MoDa Browser Core 安全框架模块
 // 实现基于最小权限原则的安全机制
 
-use tracing::{debug, info, warn};
 use std::sync::{Arc, Mutex};
 use ring::rand::{SecureRandom, SystemRandom};
 use serde::{Deserialize, Serialize};
+use tracing::{debug, info, warn};
 
 /// 安全框架
 pub struct SecurityFramework {

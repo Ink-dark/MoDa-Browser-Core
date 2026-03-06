@@ -1,10 +1,10 @@
 // MoDa Browser Core 沙箱管理模块
 // 实现基于最小权限原则的进程隔离机制
 
-use tracing::{debug, info, warn, error};
-use std::sync::{Arc, Mutex};
 use std::process::{Command, Stdio};
+use std::sync::{Arc, Mutex};
 use std::os::windows::process::CommandExt;
+use tracing::{debug, error, info, warn};
 
 /// 沙箱管理器
 pub struct SandboxManager {

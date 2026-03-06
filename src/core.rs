@@ -1,8 +1,8 @@
 // MoDa Browser Core 核心架构模块
 // 实现基于最小权限原则的模块化架构
 
-use tracing::{debug, info, warn};
 use std::sync::{Arc, Mutex};
+use tracing::{debug, info, warn};
 
 /// 核心架构组件
 pub struct CoreArchitecture {
