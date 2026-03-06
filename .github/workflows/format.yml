@@ -51,8 +51,8 @@ jobs:
     
     - name: Configure git user
       run: |
-        git config user.name "github-actions[bot]"
-        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git config user.name "Ink-dark"
+        git config user.email "d16671480856@163.com"
     
     - name: Check for formatting changes
       id: git-check
