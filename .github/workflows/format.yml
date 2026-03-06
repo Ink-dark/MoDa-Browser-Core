@@ -38,3 +38,26 @@ jobs:
       continue-on-error: true
       run: cargo fmt --check
     
+    - name: Configure git user
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+    
+    - name: Check for formatting changes
+      id: git-check
+      run: |
+        git diff --exit-code || echo "changes=true" >> $GITHUB_OUTPUT
+    
+    - name: Commit formatting changes
+      if: steps.git-check.outputs.changes == 'true'
+      run: |
+        git add .
+        git commit -m "chore: auto-format code"
+    
+    - name: Push changes
+      if: steps.git-check.outputs.changes == 'true'
+      uses: ad-m/github-push-action@master
+      with:
+        token: ${{ secrets.PAT_GITHUB_TOKEN }}
+        branch: ${{ github.ref }}
+    
