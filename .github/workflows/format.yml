@@ -1,4 +1,4 @@
-name: Auto Format Code
+name: Check Code Formatting
 
 on:
   push:
@@ -7,8 +7,8 @@ on:
     branches: [ main, dev ]
 
 jobs:
-  format-code:
-    name: Format Code with rustfmt
+  check-format:
+    name: Check Code Formatting with rustfmt
     runs-on: ubuntu-latest
     
     steps:
@@ -25,30 +25,6 @@ jobs:
     - name: Cache cargo artifacts
       uses: Swatinem/rust-cache@v2
     
-    - name: Format code
-      run: cargo fmt --all
+    - name: Check code formatting
+      run: cargo fmt --check
     
-    - name: Check for changes
-      id: check-changes
-      run: |
-        if git status --porcelain | grep -q .;
-        then
-          echo "has_changes=true" >> $GITHUB_OUTPUT
-        else
-          echo "has_changes=false" >> $GITHUB_OUTPUT
-        fi
-    
-    - name: Commit formatted code
-      if: steps.check-changes.outputs.has_changes == 'true'
-      run: |
-        git config --global user.name 'github-actions[bot]'
-        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-        git add .
-        git commit -m "Auto format code with rustfmt"
-    
-    - name: Push changes
-      if: steps.check-changes.outputs.has_changes == 'true'
-      uses: ad-m/github-push-action@master
-      with:
-        token: ${{ secrets.PAT_TOKEN }}
-        branch: main
