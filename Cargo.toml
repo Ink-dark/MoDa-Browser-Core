@@ -37,6 +37,7 @@ cmake = "0.1"
 
 [lib]
 name = "moda_core"
+path = "src/core.rs"
 crate-type = ["cdylib", "staticlib", "rlib"]
 
 [[bin]]
