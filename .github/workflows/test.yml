@@ -2,9 +2,9 @@ name: MoDa Browser Core CI
 
 on:
   push:
-    branches: [ main, dev, developing, feature/** ]
+    branches: [ main ]
   pull_request:
-    branches: [ main, dev ]
+    branches: [ main ]
 
 jobs:
   build-test:
