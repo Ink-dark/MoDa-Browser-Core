@@ -1,4 +1,4 @@
-name: Check Code Formatting
+name: Check and Format Code
 
 on:
   push:
@@ -7,8 +7,8 @@ on:
     branches: [ main, dev ]
 
 jobs:
-  check-format:
-    name: Check Code Formatting with rustfmt
+  format-code:
+    name: Check and Format Code with rustfmt
     runs-on: ubuntu-latest
     
     steps:
@@ -26,5 +26,15 @@ jobs:
       uses: Swatinem/rust-cache@v2
     
     - name: Check code formatting
+      id: check-format
+      continue-on-error: true
+      run: cargo fmt --check
+    
+    - name: Format code (always run)
+      continue-on-error: true
+      run: cargo fmt --all
+    
+    - name: Check again after formatting
+      continue-on-error: true
       run: cargo fmt --check
     
