@@ -41,11 +41,13 @@ jobs:
       continue-on-error: true
       run: cargo fmt --check
     
-    - name: Format code (always run)
+    - name: Format code (only if needed)
+      if: steps.check-format.outcome == 'failure'
       continue-on-error: true
       run: cargo fmt --all
     
     - name: Check again after formatting
+      if: steps.check-format.outcome == 'failure'
       continue-on-error: true
       run: cargo fmt --check
     
