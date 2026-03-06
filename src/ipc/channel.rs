@@ -1,10 +1,10 @@
 // MoDa Browser Core - IPC Channel Module
 // 实现通道管理和消息传递
 
+use crate::sandbox::SandboxId;
 use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::sync::mpsc;
-use crate::sandbox::SandboxId;
 
 /// 通道ID类型
 pub type ChannelId = u64;
@@ -52,7 +52,7 @@ impl Channel {
         if self.status != ChannelStatus::Connected {
             return Err("Channel is not connected".to_string());
         }
-        
+
         match self.sender.send(msg) {
             Ok(_) => Ok(()),
             Err(e) => Err(format!("Failed to send message: {}", e)),
@@ -64,7 +64,7 @@ impl Channel {
         if self.status != ChannelStatus::Connected {
             return Err("Channel is not connected".to_string());
         }
-        
+
         match self.receiver.recv().await {
             Some(msg) => Ok(msg),
             None => Err("Channel closed".to_string()),
@@ -104,15 +104,19 @@ impl ChannelManager {
     pub fn create_channel(&mut self, from: SandboxId, to: SandboxId) -> Result<ChannelId, String> {
         let channel_id = self.next_channel_id;
         self.next_channel_id += 1;
-        
+
         let channel = Channel::new(from, to);
         self.channels.insert(channel_id, channel);
-        
+
         Ok(channel_id)
     }
 
     /// 发送消息
-    pub async fn send_message(&mut self, channel_id: ChannelId, msg: Vec<u8>) -> Result<(), String> {
+    pub async fn send_message(
+        &mut self,
+        channel_id: ChannelId,
+        msg: Vec<u8>,
+    ) -> Result<(), String> {
         match self.channels.get(channel_id) {
             Some(channel) => channel.send_message(msg).await,
             None => Err(format!("Channel {} not found", channel_id)),
@@ -134,7 +138,7 @@ impl ChannelManager {
                 channel.close();
                 self.channels.remove(&channel_id);
                 Ok(())
-            },
+            }
             None => Err(format!("Channel {} not found", channel_id)),
         }
     }

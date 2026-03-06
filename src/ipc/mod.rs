@@ -1,8 +1,8 @@
 // MoDa Browser Core - IPC Module
 // M004 - 进程间通信机制
 
-pub mod message;
 pub mod channel;
+pub mod message;
 pub mod security;
 pub mod serialization;
 
@@ -31,33 +31,44 @@ impl IPCManager {
     }
 
     /// 创建通信通道
-    pub fn create_channel(&mut self, from: SandboxId, to: SandboxId) -> Result<channel::ChannelId, String> {
+    pub fn create_channel(
+        &mut self,
+        from: SandboxId,
+        to: SandboxId,
+    ) -> Result<channel::ChannelId, String> {
         self.channels.create_channel(from, to)
     }
 
     /// 发送消息
-    pub async fn send_message(&mut self, channel_id: channel::ChannelId, msg: message::Message) -> Result<(), String> {
+    pub async fn send_message(
+        &mut self,
+        channel_id: channel::ChannelId,
+        msg: message::Message,
+    ) -> Result<(), String> {
         // 序列化消息
         let serialized_msg = serialization::serialize(&msg)?;
-        
+
         // 加密消息
         let encrypted_msg = self.security.encrypt_message(serialized_msg)?;
-        
+
         // 发送消息
         self.channels.send_message(channel_id, encrypted_msg).await
     }
 
     /// 接收消息
-    pub async fn receive_message(&mut self, channel_id: channel::ChannelId) -> Result<message::Message, String> {
+    pub async fn receive_message(
+        &mut self,
+        channel_id: channel::ChannelId,
+    ) -> Result<message::Message, String> {
         // 接收消息
         let encrypted_msg = self.channels.receive_message(channel_id).await?;
-        
+
         // 解密消息
         let serialized_msg = self.security.decrypt_message(encrypted_msg)?;
-        
+
         // 反序列化消息
         let msg = serialization::deserialize(&serialized_msg)?;
-        
+
         Ok(msg)
     }
 }

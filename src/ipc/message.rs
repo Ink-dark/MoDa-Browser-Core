@@ -85,10 +85,7 @@ impl Message {
         Self {
             id,
             timestamp: SystemTime::now(),
-            msg_type: MessageType::Data(DataMessage {
-                data_type,
-                data,
-            }),
+            msg_type: MessageType::Data(DataMessage { data_type, data }),
             priority,
         }
     }
