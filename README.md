@@ -2,7 +2,6 @@
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Build Status](https://img.shields.io/github/actions/workflow/status/MoDa-Browser/MoDa-Core/ci.yml?branch=main)](https://github.com/MoDa-Browser/MoDa-Core/actions)
-[![Discord](https://img.shields.io/discord/your-server-id?logo=discord)](https://discord.gg/your-invite-link)
 [![Contributors](https://img.shields.io/github/contributors/MoDa-Browser/MoDa-Core)](https://github.com/MoDa-Browser/MoDa-Core/graphs/contributors)
 
 **MoDa Browser Core** 是一个从零设计的现代浏览器引擎，致力于通过**最小权限架构、进程级隔离和内存安全语言**构建下一代安全的网络平台。我们相信浏览器的安全性应内建于架构，而非事后附加。
@@ -218,10 +217,10 @@ heaptrack ./tests/render-benchmark
 - **邮件列表**: 公告与深度讨论
 - **社区会议**: 月度开发者会议 (线上)
 
-### 相关项目
-- https://github.com/MoDa-Browser/web-platform-tests - Web 平台测试套件
-- https://github.com/MoDa-Browser/devtools - 开发者工具
-- https://github.com/MoDa-Browser/bindings - 语言绑定 (Python, Node.js 等)
+### 相关项目 (计划中)
+- https://github.com/Ink-dark/MoDa-Browser-Core/web-platform-tests - Web 平台测试套件
+- https://github.com/Ink-dark/MoDa-Browser-Core/devtools - 开发者工具
+- https://github.com/Ink-dark/MoDa-Browser-Core/bindings - 语言绑定 (Python, Node.js 等)
 
 ## 📄 许可证
 
