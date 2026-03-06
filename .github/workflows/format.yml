@@ -12,10 +12,20 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout with SSH
+      uses: actions/checkout@v4
       with:
         fetch-depth: 0
         ssh-key: ${{ secrets.DEPLOY_SSH_KEY }}  # 使用SSH密钥进行身份验证
+        ssh-strict: false  # 可选：关闭严格的SSH主机密钥检查
+    
+    - name: Configure SSH
+      run: |
+        mkdir -p ~/.ssh
+        chmod 700 ~/.ssh
+        # 添加GitHub到已知主机，防止中间人攻击
+        ssh-keyscan github.com >> ~/.ssh/known_hosts
+        chmod 644 ~/.ssh/known_hosts
     
     - name: Setup Rust
       uses: dtolnay/rust-toolchain@stable
