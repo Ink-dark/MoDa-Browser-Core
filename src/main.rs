@@ -4,8 +4,8 @@
 use tracing_subscriber::{fmt, prelude::*, EnvFilter};
 
 mod core;
-mod security;
 mod sandbox;
+mod security;
 
 fn main() {
     // 初始化日志系统

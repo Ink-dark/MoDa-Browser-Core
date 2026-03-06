@@ -37,11 +37,13 @@ cmake = "0.1"
 
 [lib]
 name = "moda_core"
+path = "src/core.rs"
 crate-type = ["cdylib", "staticlib", "rlib"]
 
 [[bin]]
 name = "moda-browser"
 path = "src/main.rs"
 
-[workspace]
-members = [".", "src/security", "src/sandbox", "src/ipc"]
+# 工作区配置已移除，因为src/security、src/sandbox和src/ipc不是独立的Rust包
+# [workspace]
+# members = [".", "src/security", "src/sandbox", "src/ipc"]
