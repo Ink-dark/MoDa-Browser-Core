@@ -1,8 +1,8 @@
 # MoDa Browser Core -一个基于最小权限原则的现代模块化浏览器引擎
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Build Status](https://img.shields.io/github/actions/workflow/status/MoDa-Browser/MoDa-Core/ci.yml?branch=main)](https://github.com/MoDa-Browser/MoDa-Core/actions)
-[![Contributors](https://img.shields.io/github/contributors/MoDa-Browser/MoDa-Core)](https://github.com/MoDa-Browser/MoDa-Core/graphs/contributors)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/Ink-dark/MoDa-Browser-Core/ci.yml?branch=main)](https://github.com/MoDa-Browser/MoDa-Core/actions)
+[![Contributors](https://img.shields.io/github/contributors/Ink-dark/MoDa-Browser-Core)](https://github.com/MoDa-Browser/MoDa-Core/graphs/contributors)
 
 **MoDa Browser Core** 是一个从零设计的现代浏览器引擎，致力于通过**最小权限架构、进程级隔离和内存安全语言**构建下一代安全的网络平台。我们相信浏览器的安全性应内建于架构，而非事后附加。
 
