@@ -197,12 +197,12 @@ heaptrack ./tests/render-benchmark
 ### 组件完成度
 | 组件 | 状态 | 完成度 |
 |------|------|--------|
-| 安全框架 | 🟡 开发中 | 70% |
-| 进程管理 | 🟢 可用 | 85% |
-| IPC 系统 | 🟢 可用 | 80% |
-| 网络栈 | 🟡 开发中 | 60% |
-| 渲染引擎 | 🟡 原型阶段 | 40% |
-| JavaScript 引擎 | 🔴 规划中 | 10% |
+| 安全框架 | 🟡 开发中 | 0% |
+| 进程管理 | 🟡 开发中 | 0% |
+| IPC 系统 | 🟡 开发中 | 0% |
+| 网络栈 | 🟡 开发中 | 0% |
+| 渲染引擎 | 🟡 原型阶段 | 0% |
+| JavaScript 引擎 | 🔴 规划中 | 0% |
 
 ### 近期里程碑
 - **v0.1.0** (规划中): 基础进程框架与安全模型
@@ -214,7 +214,7 @@ heaptrack ./tests/render-benchmark
 
 ### 交流渠道
 - **GitHub Discussions**: 功能讨论与设计决策
-- **Discord 服务器**: 实时交流与协作
+- **飞书群**: 实时交流与协作
 - **邮件列表**: 公告与深度讨论
 - **社区会议**: 月度开发者会议 (线上)
 
@@ -228,7 +228,7 @@ heaptrack ./tests/render-benchmark
 MoDa Browser Core 使用 **Apache License 2.0** 开源。
 
 ```
-Copyright 2024-2026 The MoDa Browser Authors
+Copyright 2024-2026 MoDa Browser Core Community
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -250,16 +250,17 @@ limitations under the License.
 感谢所有为项目做出贡献的开发者，特别感谢：
 
 - **Ink-dark (墨染柒DarkSeven)** - 项目发起人与架构设计
-- 所有代码贡献者 (https://github.com/MoDa-Browser/MoDa-Core/graphs/contributors)
+- 所有代码贡献者 (https://github.com/Ink-dark/MoDa-Browser-Core/graphs/contributors)
 - 安全研究人员与审计人员
-- 开源浏览器社区 (Chromium, Firefox, Servo) 的启发
+- 开源浏览器社区 (Chromium, Firefox, Servo) 的启发与贡献
 
 ## 🆘 支持与联系
 
-- **问题反馈**: https://github.com/MoDa-Browser/MoDa-Core/issues
+- **问题反馈**: https://github.com/Ink-dark/MoDa-Browser-Core/issues
 - **安全漏洞**: SECURITY.md
-- **合作咨询**: contact@modabrowser.org
-- **项目官网**: https://modabrowser.org (规划中)
+- **合作咨询**: contact@modabrowser.hallochat.cn
+- **项目官网**: https://modabrowser.hallochat.cn (规划中)
+- **加入我们**: 想加入我们？联系墨染柒DarkSeven（QQ：3773704332，验证问题全部填写MoDaBrowser）
 
 ---
 
