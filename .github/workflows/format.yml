@@ -56,8 +56,8 @@ jobs:
     
     - name: Push changes
       if: steps.git-check.outputs.changes == 'true'
-      uses: ad-m/github-push-action@master
-      with:
-        github_token: ${{ secrets.PAT_TOKEN }}
-        branch: ${{ github.ref }}
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git push https://x-access-token:${{ secrets.PAT_GITHUB_TOKEN }}@github.com/${{ github.repository }}.git ${{ github.ref }}
     
