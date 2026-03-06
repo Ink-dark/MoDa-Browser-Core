@@ -58,6 +58,6 @@ jobs:
       if: steps.git-check.outputs.changes == 'true'
       uses: ad-m/github-push-action@master
       with:
-        token: ${{ secrets.PAT_GITHUB_TOKEN }}
+        github_token: ${{ secrets.PAT_TOKEN }}
         branch: ${{ github.ref }}
     
