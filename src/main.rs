@@ -56,7 +56,6 @@ fn main() {
 
     // 等待退出信号
     use std::sync::atomic::{AtomicBool, Ordering};
-    use std::sync::Arc;
 
     let running = Arc::new(AtomicBool::new(true));
     signal_hook::flag::register(signal_hook::consts::SIGINT, Arc::clone(&running)).unwrap();

@@ -417,6 +417,7 @@ impl Sandbox {
     /// 获取 CPU 使用率（Windows 实现）
     #[cfg(target_os = "windows")]
     fn get_cpu_usage(&self, pid: u32) -> Result<f64, String> {
+        use windows_sys::Win32::System::ProcessStatus::GetProcessTimes;
         use windows_sys::Win32::System::Threading::OpenProcess;
 
         unsafe {
@@ -569,7 +570,6 @@ impl Sandbox {
     /// 终止进程（Windows 实现）
     #[cfg(target_os = "windows")]
     fn terminate_process(&self, pid: u32) -> Result<(), String> {
-        use std::ptr::null_mut;
         use windows_sys::Win32::Foundation::{
             BOOL, ERROR_ACCESS_DENIED, ERROR_INVALID_PARAMETER, HANDLE,
         };

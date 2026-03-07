@@ -265,7 +265,7 @@ impl IpcManager {
         let mut seed = [0u8; 32];
         rng.fill(&mut seed)
             .map_err(|e| format!("生成随机种子失败: {}", e))?;
-        let key_pair = Ed25519KeyPair::from_seed_unchecked(&seed)?;
+        let key_pair = Ed25519KeyPair::from_seed_unchecked(&seed).map_err(|e| format!("生成密钥对失败: {}", e))?;
         Ok(Arc::new(key_pair))
     }
 
