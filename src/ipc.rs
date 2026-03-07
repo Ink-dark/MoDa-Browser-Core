@@ -145,7 +145,7 @@ impl IpcChannel {
     /// 接收消息
     pub async fn receive(&self) -> Result<IpcMessage, String> {
         let mut rx = self.rx.lock().unwrap();
-        match rx.recv() {
+        match rx.recv().await {
             Some(message) => {
                 debug!("接收 IPC 消息: {} -> {}", message.sender, message.receiver);
 

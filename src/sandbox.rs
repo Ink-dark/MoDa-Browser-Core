@@ -7,6 +7,9 @@ use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 use tracing::{debug, error, info, warn};
 
+#[cfg(target_os = "windows")]
+use std::os::windows::process::CommandExt;
+
 /// 沙箱管理器
 pub struct SandboxManager {
     /// 沙箱实例列表
@@ -253,6 +256,7 @@ impl Sandbox {
 
         // 在 Windows 上设置进程创建标志，启用基本的沙箱隔离
         // 注意：Windows 上的沙箱实现与 Linux 不同，这里使用基本的进程隔离
+        #[cfg(target_os = "windows")]
         command.creation_flags(0x08000000); // CREATE_NO_WINDOW
 
         // 启动进程
@@ -410,6 +414,7 @@ impl Sandbox {
     }
 
     /// 获取 CPU 使用率（Windows 实现）
+    #[cfg(target_os = "windows")]
     fn get_cpu_usage(&self, pid: u32) -> Result<f64, String> {
         use windows_sys::Win32::System::ProcessStatus::GetProcessTimes;
         use windows_sys::Win32::System::Threading::OpenProcess;
@@ -445,6 +450,7 @@ impl Sandbox {
     }
 
     /// 获取内存使用量（Windows 实现）
+    #[cfg(target_os = "windows")]
     fn get_memory_usage(&self, pid: u32) -> Result<u64, String> {
         use windows_sys::Win32::System::ProcessStatus::GetProcessMemoryInfo;
         use windows_sys::Win32::System::ProcessStatus::PROCESS_MEMORY_COUNTERS;
@@ -474,6 +480,18 @@ impl Sandbox {
             Some(start) => Ok(start.elapsed().as_secs()),
             None => Ok(0),
         }
+    }
+
+    /// 获取 CPU 使用率（非 Windows 平台实现）
+    #[cfg(not(target_os = "windows"))]
+    fn get_cpu_usage(&self, _pid: u32) -> Result<f64, String> {
+        Ok(0.0)
+    }
+
+    /// 获取内存使用量（非 Windows 平台实现）
+    #[cfg(not(target_os = "windows"))]
+    fn get_memory_usage(&self, _pid: u32) -> Result<u64, String> {
+        Ok(0)
     }
 
     /// 暂停沙箱进程
@@ -549,6 +567,7 @@ impl Sandbox {
     }
 
     /// 终止进程（Windows 实现）
+    #[cfg(target_os = "windows")]
     fn terminate_process(&self, pid: u32) -> Result<(), String> {
         use std::ptr::null_mut;
         use windows_sys::Win32::Foundation::{

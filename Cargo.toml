@@ -20,7 +20,7 @@ crossbeam = "0.8"
 
 # 日志相关
 tracing = "0.1"
-tracing-subscriber = "0.3"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 # 配置相关
 config = "0.14"

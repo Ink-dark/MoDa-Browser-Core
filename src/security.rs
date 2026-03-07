@@ -42,7 +42,8 @@ pub struct CapabilityToken {
 }
 
 /// 权限类型
-enum Permission {
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub enum Permission {
     Read,
     Write,
     Execute,
