@@ -21,7 +21,7 @@ enum ComponentState {
 }
 
 /// 组件接口
-trait Component {
+pub trait Component {
     /// 组件名称
     fn name(&self) -> &'static str;
 
@@ -40,10 +40,9 @@ impl CoreArchitecture {
     pub fn new() -> Self {
         debug!("正在创建核心架构实例...");
 
-        let mut components: Vec<Arc<dyn Component>> = Vec::new();
+        let components: Vec<Arc<dyn Component>> = Vec::new();
 
         // 可以在这里添加默认组件
-
         Self {
             state: Arc::new(Mutex::new(ComponentState::Initialized)),
             components,
