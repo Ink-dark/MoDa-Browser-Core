@@ -312,7 +312,7 @@ impl Sandbox {
             None => return Ok(()),
         };
 
-        let state = *self.state.lock().unwrap();
+        let state = self.state.lock().unwrap().clone();
         if !matches!(state, SandboxState::Running) {
             return Ok(());
         }
@@ -604,7 +604,7 @@ impl Sandbox {
 
     /// 获取沙箱状态
     pub fn state(&self) -> SandboxState {
-        *self.state.lock().unwrap()
+        self.state.lock().unwrap().clone()
     }
 
     /// 获取进程 ID

@@ -55,12 +55,16 @@ fn main() {
     tracing::info!("MoDa Browser Core 运行中...");
 
     // 等待退出信号
-    let (_tx, rx) = std::sync::mpsc::channel();
-    let rx = Arc::new(std::sync::Mutex::new(rx));
-    signal_hook::flag::register(signal_hook::consts::SIGINT, Arc::clone(&rx)).unwrap();
-    signal_hook::flag::register(signal_hook::consts::SIGTERM, Arc::clone(&rx)).unwrap();
+    use std::sync::atomic::{AtomicBool, Ordering};
+    use std::sync::Arc;
 
-    rx.lock().unwrap().recv().unwrap();
+    let running = Arc::new(AtomicBool::new(true));
+    signal_hook::flag::register(signal_hook::consts::SIGINT, Arc::clone(&running)).unwrap();
+    signal_hook::flag::register(signal_hook::consts::SIGTERM, Arc::clone(&running)).unwrap();
+
+    while running.load(Ordering::Relaxed) {
+        std::thread::sleep(std::time::Duration::from_millis(100));
+    }
 
     tracing::info!("收到退出信号，正在关闭 MoDa Browser Core...");
 
