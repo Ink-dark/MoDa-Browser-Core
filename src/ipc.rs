@@ -219,13 +219,7 @@ impl IpcChannel {
         // 简化实现，实际需要从密钥管理器获取发送者的公钥
         let public_key = self.key_pair.public_key();
 
-        if ring::signature::verify(
-            public_key.as_ref(),
-            &message_bytes,
-            &signature_bytes,
-        )
-        .is_err()
-        {
+        if ring::signature::verify(public_key.as_ref(), &message_bytes, &signature_bytes).is_err() {
             return Err("签名验证失败".to_string());
         }
 
