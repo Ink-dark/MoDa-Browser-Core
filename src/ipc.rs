@@ -187,7 +187,10 @@ impl IpcChannel {
 
         // 验证能力令牌
         if let Some(ref token) = message.capability_token {
-            if !self.security.verify_capability(token, &message.receiver, &Permission::Write) {
+            if !self
+                .security
+                .verify_capability(token, &message.receiver, &Permission::Write)
+            {
                 return Err("能力令牌验证失败".to_string());
             }
         }
@@ -267,7 +270,8 @@ impl IpcManager {
     pub fn generate_key_pair() -> Result<Arc<Ed25519KeyPair>, String> {
         let rng = ring::rand::SystemRandom::new();
         let mut seed = [0u8; 32];
-        rng.fill(&mut seed).map_err(|e| format!("生成随机种子失败: {}", e))?;
+        rng.fill(&mut seed)
+            .map_err(|e| format!("生成随机种子失败: {}", e))?;
 
         let key_pair = Ed25519KeyPair::from_seed_unchecked(&seed);
         Ok(Arc::new(key_pair))

@@ -617,10 +617,10 @@ impl Default for ResourceLimits {
             max_cpu_percent: None,
             max_memory_mb: Some(1024), // 默认限制 1GB 内存
             max_file_descriptors: None,
-            max_processes: Some(10), // 默认限制 10 个子进程
-            max_runtime_seconds: Some(3600), // 默认限制 1 小时
+            max_processes: Some(10),            // 默认限制 10 个子进程
+            max_runtime_seconds: Some(3600),    // 默认限制 1 小时
             max_network_connections: Some(100), // 默认限制 100 个网络连接
-            max_disk_write_mb: Some(1024), // 默认限制 1GB 磁盘写入
+            max_disk_write_mb: Some(1024),      // 默认限制 1GB 磁盘写入
         }
     }
 }

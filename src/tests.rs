@@ -107,7 +107,15 @@ mod tests {
     #[test]
     fn test_security_framework_creation() {
         let security = security::SecurityFramework::new();
-        assert_eq!(security.capability_manager.issued_tokens.lock().unwrap().len(), 0);
+        assert_eq!(
+            security
+                .capability_manager
+                .issued_tokens
+                .lock()
+                .unwrap()
+                .len(),
+            0
+        );
     }
 
     #[test]
@@ -134,11 +142,13 @@ mod tests {
             "test-subject",
         );
 
-        let result = security.verify_capability(&token, "/test/resource", &security::Permission::Read);
+        let result =
+            security.verify_capability(&token, "/test/resource", &security::Permission::Read);
         assert!(result);
 
         // 测试权限不足的情况
-        let result = security.verify_capability(&token, "/test/resource", &security::Permission::Write);
+        let result =
+            security.verify_capability(&token, "/test/resource", &security::Permission::Write);
         assert!(!result);
     }
 
