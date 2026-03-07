@@ -56,10 +56,11 @@ fn main() {
 
     // 等待退出信号
     let (_tx, rx) = std::sync::mpsc::channel();
-    signal_hook::flag::register(signal_hook::consts::SIGINT, rx.clone()).unwrap();
-    signal_hook::flag::register(signal_hook::consts::SIGTERM, rx.clone()).unwrap();
+    let rx = Arc::new(std::sync::Mutex::new(rx));
+    signal_hook::flag::register(signal_hook::consts::SIGINT, Arc::clone(&rx)).unwrap();
+    signal_hook::flag::register(signal_hook::consts::SIGTERM, Arc::clone(&rx)).unwrap();
 
-    rx.recv().unwrap();
+    rx.lock().unwrap().recv().unwrap();
 
     tracing::info!("收到退出信号，正在关闭 MoDa Browser Core...");
 

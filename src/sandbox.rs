@@ -118,7 +118,7 @@ impl Clone for Sandbox {
 }
 
 /// 沙箱状态
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 enum SandboxState {
     Created,
     Running,

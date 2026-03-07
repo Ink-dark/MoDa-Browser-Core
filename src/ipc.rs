@@ -3,7 +3,7 @@
 
 use crate::security::{CapabilityToken, Permission, SecurityFramework};
 use ring::rand::SecureRandom;
-use ring::signature::{self, UnparsedPublicKey, ED25519};
+use ring::signature::{self, ED25519, Ed25519KeyPair, KeyPair, UnparsedPublicKey};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
