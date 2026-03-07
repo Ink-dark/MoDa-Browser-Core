@@ -3,7 +3,7 @@
 
 use crate::security::{CapabilityToken, Permission, SecurityFramework};
 use ring::rand::SecureRandom;
-use ring::signature::{self, Ed25519KeyPair, KeyPair, UnparsedPublicKey, ED25519};
+use ring::signature::{Ed25519KeyPair, KeyPair, UnparsedPublicKey, ED25519};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
@@ -265,8 +265,7 @@ impl IpcManager {
         let mut seed = [0u8; 32];
         rng.fill(&mut seed)
             .map_err(|e| format!("生成随机种子失败: {}", e))?;
-
-        let key_pair = Ed25519KeyPair::from_seed_unchecked(&seed);
+        let key_pair = Ed25519KeyPair::from_seed_unchecked(&seed)?;
         Ok(Arc::new(key_pair))
     }
 

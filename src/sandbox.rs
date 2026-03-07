@@ -417,7 +417,6 @@ impl Sandbox {
     /// 获取 CPU 使用率（Windows 实现）
     #[cfg(target_os = "windows")]
     fn get_cpu_usage(&self, pid: u32) -> Result<f64, String> {
-        use windows_sys::Win32::System::ProcessStatus::GetProcessTimes;
         use windows_sys::Win32::System::Threading::OpenProcess;
 
         unsafe {
@@ -470,7 +469,7 @@ impl Sandbox {
                 return Err("无法获取进程内存信息".to_string());
             }
 
-            Ok(memory_info.WorkingSetSize / 1024 / 1024)
+            Ok((memory_info.WorkingSetSize / 1024 / 1024) as u64)
         }
     }
 
