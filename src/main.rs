@@ -4,8 +4,16 @@
 use tracing_subscriber::{fmt, prelude::*, EnvFilter};
 
 mod core;
+mod ipc;
 mod sandbox;
 mod security;
+
+#[cfg(test)]
+mod tests;
+
+use ipc::IpcManager;
+use security::SecurityFramework;
+use std::sync::Arc;
 
 fn main() {
     // 初始化日志系统
@@ -25,8 +33,12 @@ fn main() {
     tracing::debug!("核心架构初始化完成");
 
     // 初始化安全框架
-    let security = security::SecurityFramework::new();
+    let security = Arc::new(SecurityFramework::new());
     tracing::debug!("安全框架初始化完成");
+
+    // 初始化 IPC 管理器
+    let ipc = Arc::new(IpcManager::new(Arc::clone(&security)));
+    tracing::debug!("IPC 管理器初始化完成");
 
     // 初始化沙箱管理机制
     let sandbox = sandbox::SandboxManager::new();
@@ -37,6 +49,7 @@ fn main() {
     // 运行核心组件
     core.run();
     security.run();
+    ipc.run();
     sandbox.run();
 
     tracing::info!("MoDa Browser Core 运行中...");
@@ -53,6 +66,7 @@ fn main() {
     // 关闭核心组件
     core.shutdown();
     security.shutdown();
+    ipc.shutdown();
     sandbox.shutdown();
 
     tracing::info!("MoDa Browser Core 已安全关闭");

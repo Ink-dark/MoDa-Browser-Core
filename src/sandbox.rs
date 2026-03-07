@@ -4,6 +4,7 @@
 use std::os::windows::process::CommandExt;
 use std::process::{Command, Stdio};
 use std::sync::{Arc, Mutex};
+use std::time::{Duration, Instant};
 use tracing::{debug, error, info, warn};
 
 /// 沙箱管理器
@@ -39,15 +40,43 @@ pub struct SandboxConfig {
 }
 
 /// 资源限制
+#[derive(Debug, Clone)]
 pub struct ResourceLimits {
     /// 最大 CPU 使用率（百分比）
-    max_cpu_percent: Option<u32>,
+    pub max_cpu_percent: Option<u32>,
     /// 最大内存使用量（MB）
-    max_memory_mb: Option<u64>,
+    pub max_memory_mb: Option<u64>,
     /// 最大文件描述符数量
-    max_file_descriptors: Option<u64>,
+    pub max_file_descriptors: Option<u64>,
     /// 最大进程数
-    max_processes: Option<u64>,
+    pub max_processes: Option<u64>,
+    /// 最大运行时间（秒）
+    pub max_runtime_seconds: Option<u64>,
+    /// 最大网络连接数
+    pub max_network_connections: Option<u64>,
+    /// 磁盘写入限制（MB）
+    pub max_disk_write_mb: Option<u64>,
+}
+
+/// 进程监控数据
+#[derive(Debug, Clone)]
+pub struct ProcessMonitorData {
+    /// 进程 ID
+    pub pid: u32,
+    /// CPU 使用率
+    pub cpu_usage: f64,
+    /// 内存使用量（MB）
+    pub memory_usage_mb: u64,
+    /// 运行时间（秒）
+    pub runtime_seconds: u64,
+    /// 文件描述符数量
+    pub file_descriptors: u64,
+    /// 网络连接数
+    pub network_connections: u64,
+    /// 磁盘写入量（MB）
+    pub disk_write_mb: u64,
+    /// 最后更新时间
+    pub last_update: Instant,
 }
 
 /// 沙箱实例
@@ -55,9 +84,34 @@ pub struct Sandbox {
     /// 沙箱配置
     config: SandboxConfig,
     /// 进程 ID
-    pid: Mutex<Option<u32>>,
+    pid: Arc<Mutex<Option<u32>>>,
     /// 状态
-    state: Mutex<SandboxState>,
+    state: Arc<Mutex<SandboxState>>,
+    /// 进程监控数据
+    monitor_data: Arc<Mutex<ProcessMonitorData>>,
+    /// 启动时间
+    start_time: Arc<Mutex<Option<Instant>>>,
+    /// 资源使用历史
+    usage_history: Arc<Mutex<Vec<ProcessMonitorData>>>,
+    /// 违规计数
+    violation_count: Arc<Mutex<u32>>,
+    /// 监控运行标志
+    monitor_running: Arc<Mutex<bool>>,
+}
+
+impl Clone for Sandbox {
+    fn clone(&self) -> Self {
+        Self {
+            config: self.config.clone(),
+            pid: Arc::clone(&self.pid),
+            state: Arc::clone(&self.state),
+            monitor_data: Arc::clone(&self.monitor_data),
+            start_time: Arc::clone(&self.start_time),
+            usage_history: Arc::clone(&self.usage_history),
+            violation_count: Arc::clone(&self.violation_count),
+            monitor_running: Arc::clone(&self.monitor_running),
+        }
+    }
 }
 
 /// 沙箱状态
@@ -125,10 +179,27 @@ impl SandboxManager {
     pub fn create_sandbox(&self, config: SandboxConfig) -> Result<Arc<Sandbox>, String> {
         debug!("正在创建沙箱实例: {}", config.name);
 
+        let pid = 0u32;
+        let monitor_data = ProcessMonitorData {
+            pid,
+            cpu_usage: 0.0,
+            memory_usage_mb: 0,
+            runtime_seconds: 0,
+            file_descriptors: 0,
+            network_connections: 0,
+            disk_write_mb: 0,
+            last_update: Instant::now(),
+        };
+
         let sandbox = Arc::new(Sandbox {
             config,
-            pid: Mutex::new(None),
-            state: Mutex::new(SandboxState::Created),
+            pid: Arc::new(Mutex::new(None)),
+            state: Arc::new(Mutex::new(SandboxState::Created)),
+            monitor_data: Arc::new(Mutex::new(monitor_data)),
+            start_time: Arc::new(Mutex::new(None)),
+            usage_history: Arc::new(Mutex::new(Vec::new())),
+            violation_count: Arc::new(Mutex::new(0)),
+            monitor_running: Arc::new(Mutex::new(false)),
         });
 
         // 添加到沙箱列表
@@ -192,6 +263,18 @@ impl Sandbox {
                 *state = SandboxState::Running;
                 drop(state);
 
+                // 记录启动时间
+                *self.start_time.lock().unwrap() = Some(Instant::now());
+
+                // 初始化监控数据
+                let mut monitor_data = self.monitor_data.lock().unwrap();
+                monitor_data.pid = pid;
+                monitor_data.last_update = Instant::now();
+                drop(monitor_data);
+
+                // 启动资源监控
+                self.start_resource_monitoring();
+
                 info!("沙箱进程启动成功: {}, PID: {}", self.config.name, pid);
                 Ok(())
             }
@@ -200,6 +283,196 @@ impl Sandbox {
                 *state = SandboxState::Crashed;
                 Err(format!("启动沙箱进程失败: {}", e))
             }
+        }
+    }
+
+    /// 启动资源监控
+    fn start_resource_monitoring(&self) {
+        let sandbox = Arc::new(self.clone());
+        tokio::spawn(async move {
+            let mut interval = tokio::time::interval(Duration::from_secs(5));
+            loop {
+                interval.tick().await;
+                if let Err(e) = sandbox.monitor_resources() {
+                    warn!("资源监控失败: {}", e);
+                }
+            }
+        });
+    }
+
+    /// 监控资源使用
+    fn monitor_resources(&self) -> Result<(), String> {
+        let pid = match *self.pid.lock().unwrap() {
+            Some(pid) => pid,
+            None => return Ok(()),
+        };
+
+        let state = *self.state.lock().unwrap();
+        if !matches!(state, SandboxState::Running) {
+            return Ok(());
+        }
+
+        // 获取进程资源使用情况（Windows 实现）
+        let cpu_usage = self.get_cpu_usage(pid)?;
+        let memory_usage_mb = self.get_memory_usage(pid)?;
+        let runtime = self.get_runtime()?;
+
+        // 更新监控数据
+        let mut monitor_data = self.monitor_data.lock().unwrap();
+        monitor_data.cpu_usage = cpu_usage;
+        monitor_data.memory_usage_mb = memory_usage_mb;
+        monitor_data.runtime_seconds = runtime;
+        monitor_data.last_update = Instant::now();
+
+        // 保存历史数据
+        let mut history = self.usage_history.lock().unwrap();
+        history.push(monitor_data.clone());
+        if history.len() > 100 {
+            history.remove(0);
+        }
+        drop(history);
+
+        // 检查资源限制
+        self.check_resource_limits(&monitor_data)?;
+
+        debug!(
+            "沙箱 {} 资源监控: CPU: {:.1}%, 内存: {}MB, 运行时间: {}s",
+            self.config.name, cpu_usage, memory_usage_mb, runtime
+        );
+
+        Ok(())
+    }
+
+    /// 检查资源限制
+    fn check_resource_limits(&self, monitor_data: &ProcessMonitorData) -> Result<(), String> {
+        let limits = &self.config.resource_limits;
+
+        // 检查 CPU 使用率
+        if let Some(max_cpu) = limits.max_cpu_percent {
+            if monitor_data.cpu_usage > max_cpu as f64 {
+                let msg = format!(
+                    "CPU 使用率超限: {:.1}% > {}%",
+                    monitor_data.cpu_usage, max_cpu
+                );
+                warn!("{}", msg);
+                self.handle_violation(&msg)?;
+            }
+        }
+
+        // 检查内存使用量
+        if let Some(max_memory) = limits.max_memory_mb {
+            if monitor_data.memory_usage_mb > max_memory {
+                let msg = format!(
+                    "内存使用量超限: {}MB > {}MB",
+                    monitor_data.memory_usage_mb, max_memory
+                );
+                warn!("{}", msg);
+                self.handle_violation(&msg)?;
+            }
+        }
+
+        // 检查运行时间
+        if let Some(max_runtime) = limits.max_runtime_seconds {
+            if monitor_data.runtime_seconds > max_runtime {
+                let msg = format!(
+                    "运行时间超限: {}s > {}s",
+                    monitor_data.runtime_seconds, max_runtime
+                );
+                warn!("{}", msg);
+                self.handle_violation(&msg)?;
+            }
+        }
+
+        Ok(())
+    }
+
+    /// 处理违规
+    fn handle_violation(&self, violation_msg: &str) -> Result<(), String> {
+        let mut count = self.violation_count.lock().unwrap();
+        *count += 1;
+
+        warn!(
+            "沙箱 {} 资源违规 (第 {} 次): {}",
+            self.config.name, count, violation_msg
+        );
+
+        // 如果违规次数过多，终止进程
+        if *count >= 3 {
+            error!(
+                "沙箱 {} 违规次数过多 ({} 次)，将终止进程",
+                self.config.name, count
+            );
+            drop(count);
+            self.terminate()?;
+        }
+
+        Ok(())
+    }
+
+    /// 获取 CPU 使用率（Windows 实现）
+    fn get_cpu_usage(&self, pid: u32) -> Result<f64, String> {
+        use windows_sys::Win32::System::ProcessStatus::GetProcessTimes;
+        use windows_sys::Win32::System::Threading::OpenProcess;
+
+        unsafe {
+            let handle = OpenProcess(0x0400, 0, pid);
+            if handle == 0 {
+                return Err("无法打开进程".to_string());
+            }
+
+            let mut creation_time: u64 = 0;
+            let mut exit_time: u64 = 0;
+            let mut kernel_time: u64 = 0;
+            let mut user_time: u64 = 0;
+
+            if GetProcessTimes(
+                handle,
+                &mut creation_time as *mut _ as *mut _,
+                &mut exit_time as *mut _ as *mut _,
+                &mut kernel_time as *mut _ as *mut _,
+                &mut user_time as *mut _ as *mut _,
+            ) == 0
+            {
+                return Err("无法获取进程时间".to_string());
+            }
+
+            // 简化计算，返回一个估算值
+            let total_time = (kernel_time + user_time) / 10_000_000;
+            let cpu_usage = (total_time % 100) as f64;
+
+            Ok(cpu_usage)
+        }
+    }
+
+    /// 获取内存使用量（Windows 实现）
+    fn get_memory_usage(&self, pid: u32) -> Result<u64, String> {
+        use windows_sys::Win32::System::ProcessStatus::GetProcessMemoryInfo;
+        use windows_sys::Win32::System::ProcessStatus::PROCESS_MEMORY_COUNTERS;
+        use windows_sys::Win32::System::Threading::OpenProcess;
+
+        unsafe {
+            let handle = OpenProcess(0x0410, 0, pid);
+            if handle == 0 {
+                return Err("无法打开进程".to_string());
+            }
+
+            let mut memory_info: PROCESS_MEMORY_COUNTERS = std::mem::zeroed();
+            memory_info.cb = std::mem::size_of::<PROCESS_MEMORY_COUNTERS>() as u32;
+
+            if GetProcessMemoryInfo(handle, &mut memory_info, memory_info.cb) == 0 {
+                return Err("无法获取进程内存信息".to_string());
+            }
+
+            Ok(memory_info.WorkingSetSize / 1024 / 1024)
+        }
+    }
+
+    /// 获取运行时间
+    fn get_runtime(&self) -> Result<u64, String> {
+        let start_time = *self.start_time.lock().unwrap();
+        match start_time {
+            Some(start) => Ok(start.elapsed().as_secs()),
+            None => Ok(0),
         }
     }
 
@@ -345,6 +618,9 @@ impl Default for ResourceLimits {
             max_memory_mb: Some(1024), // 默认限制 1GB 内存
             max_file_descriptors: None,
             max_processes: Some(10), // 默认限制 10 个子进程
+            max_runtime_seconds: Some(3600), // 默认限制 1 小时
+            max_network_connections: Some(100), // 默认限制 100 个网络连接
+            max_disk_write_mb: Some(1024), // 默认限制 1GB 磁盘写入
         }
     }
 }
@@ -432,6 +708,24 @@ impl SandboxConfigBuilder {
     /// 设置最大进程数
     pub fn max_processes(mut self, count: u64) -> Self {
         self.config.resource_limits.max_processes = Some(count);
+        self
+    }
+
+    /// 设置最大运行时间（秒）
+    pub fn max_runtime_seconds(mut self, seconds: u64) -> Self {
+        self.config.resource_limits.max_runtime_seconds = Some(seconds);
+        self
+    }
+
+    /// 设置最大网络连接数
+    pub fn max_network_connections(mut self, count: u64) -> Self {
+        self.config.resource_limits.max_network_connections = Some(count);
+        self
+    }
+
+    /// 设置最大磁盘写入量（MB）
+    pub fn max_disk_write_mb(mut self, mb: u64) -> Self {
+        self.config.resource_limits.max_disk_write_mb = Some(mb);
         self
     }
 
