@@ -25,7 +25,7 @@ enum FrameworkState {
 }
 
 /// 能力令牌 - 基于最小权限原则的访问控制
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CapabilityToken {
     /// 令牌 ID
     id: String,

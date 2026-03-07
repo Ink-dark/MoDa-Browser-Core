@@ -1,7 +1,6 @@
 // MoDa Browser Core 沙箱管理模块
 // 实现基于最小权限原则的进程隔离机制
 
-use std::os::windows::process::CommandExt;
 use std::process::{Command, Stdio};
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
@@ -27,6 +26,7 @@ enum ManagerState {
 }
 
 /// 沙箱配置
+#[derive(Debug, Clone)]
 pub struct SandboxConfig {
     /// 沙箱名称
     name: String,
@@ -118,6 +118,7 @@ impl Clone for Sandbox {
 }
 
 /// 沙箱状态
+#[derive(Debug)]
 enum SandboxState {
     Created,
     Running,

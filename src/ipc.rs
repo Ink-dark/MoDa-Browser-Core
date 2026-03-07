@@ -3,11 +3,11 @@
 
 use crate::security::{CapabilityToken, Permission, SecurityFramework};
 use ring::rand::SecureRandom;
-use ring::signature::{Ed25519KeyPair, KeyPair, Signature};
+use ring::signature::{Ed25519KeyPair, KeyPair};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
-use tokio::sync::{mpsc, oneshot};
+use tokio::sync::mpsc;
 use tracing::{debug, error, info, warn};
 
 /// IPC 消息
@@ -220,7 +220,6 @@ impl IpcChannel {
         let public_key = self.key_pair.public_key();
 
         if ring::signature::verify(
-            &ring::signature::ED25519,
             public_key.as_ref(),
             &message_bytes,
             &signature_bytes,
