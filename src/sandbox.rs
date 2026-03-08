@@ -425,9 +425,25 @@ impl Sandbox {
                 return Err("无法打开进程".to_string());
             }
 
-            // 简化实现，返回一个估算值
-            // 实际实现需要使用 GetProcessTimes，但该函数不在 ProcessStatus 模块中
-            // 这里返回一个默认值作为占位符
+            // 临时实现：返回默认值 0.0
+            // 
+            // 问题：GetProcessTimes 函数不在 ProcessStatus 模块中
+            // 尝试的导入路径：
+            // - use windows_sys::Win32::System::ProcessStatus::GetProcessTimes; (失败)
+            // - use windows_sys::Win32::System::Threading::GetProcessTimes; (失败)
+            //
+            // 解决方案：
+            // 1. 查看 windows_sys 文档：https://docs.rs/windows-sys/latest/windows_sys/
+            // 2. 查看 Microsoft Windows API 文档：https://learn.microsoft.com/en-us/windows/win32/api/
+            // 3. 使用 IDE 自动完成功能查看可用导入
+            // 4. 查看 windows_sys 源代码：https://github.com/microsoft/windows-rs/tree/main/crates/libs/sys
+            //
+            // 替代方案：
+            // - 使用 GetProcessMemoryInfo 获取内存使用量
+            // - 使用性能计数器来估算 CPU 使用率
+            // - 实现基于时间间隔的 CPU 使用率计算
+            //
+            // TODO: 找到 GetProcessTimes 的正确导入路径后实现完整功能
             Ok(0.0)
         }
     }
